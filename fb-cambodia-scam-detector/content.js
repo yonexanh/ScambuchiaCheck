@@ -455,6 +455,40 @@
     return window.location.href.split('#')[0];
   }
 
+  function normalizeEvidenceContext(context) {
+    return String(context || '')
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 220);
+  }
+
+  function findAnyLocationEvidence(text, locationKeywords, source) {
+    for (const keyword of locationKeywords) {
+      if (!containsKeyword(text, keyword)) continue;
+
+      return {
+        keyword,
+        source,
+        context: getTextWindow(text, keyword, 120),
+      };
+    }
+
+    return null;
+  }
+
+  function formatEvidenceDetails(details) {
+    const keyword = escapeHtml(details && details.keyword ? details.keyword : 'Cambodia');
+    const source = escapeHtml(details && details.source ? details.source : 'Page Transparency');
+    const context = escapeHtml(normalizeEvidenceContext(details && details.context));
+
+    return {
+      keyword,
+      source,
+      context,
+    };
+  }
+
   function showScamBanner(pageName, details) {
     if (bannerShown) return;
     bannerShown = true;
@@ -466,6 +500,7 @@
     banner.className = 'fb-scam-banner';
     const displayPageName = escapeHtml(pageName && pageName !== 'Unknown' ? pageName : getCurrentPageName());
     const displayPageUrl = escapeHtml(getCurrentPageUrl());
+    const evidence = formatEvidenceDetails(details);
     banner.innerHTML = `
       <span class="fb-scam-icon">⚠️</span>
       <div class="fb-scam-text">
@@ -474,6 +509,8 @@
         <span class="fb-scam-detail" style="font-size: 12px; margin-top: 4px;">Trang này được quản lý từ Campuchia — Nguy cơ lừa đảo cao</span>
         <span class="fb-scam-detail fb-scam-page-name">Page: ${displayPageName}</span>
         <span class="fb-scam-detail fb-scam-page-url">URL: ${displayPageUrl}</span>
+        <span class="fb-scam-detail fb-scam-reason">Lý do: phát hiện từ khóa "${evidence.keyword}" trong ${evidence.source}</span>
+        <span class="fb-scam-detail fb-scam-context">Ngữ cảnh: ${evidence.context || 'Không có ngữ cảnh chi tiết'}</span>
       </div>
       <button class="fb-scam-close" type="button">✕</button>
     `;
@@ -483,7 +520,7 @@
 
     const bodyStyle = document.body.style;
     bodyPaddingBeforeWarning = bodyStyle.paddingTop || '';
-    bodyStyle.paddingTop = '135px';
+    bodyStyle.paddingTop = '180px';
 
     const pageContainer =
       document.querySelector('[role="main"]') ||
@@ -601,12 +638,14 @@
     const transparencyText = fetchedText.join(' ');
 
     if (transparencyText && containsCambodia(transparencyText)) {
-      showScamBanner('Unknown', { keyword: 'Cambodia', context: 'Fetched transparency page' });
+      const evidence = findAnyLocationEvidence(transparencyText, CAMBODIA_KEYWORDS, 'fetched transparency page');
+      showScamBanner('Unknown', evidence || { keyword: 'Cambodia', source: 'fetched transparency page', context: transparencyText });
       return;
     }
 
     if (url.includes('about_profile_transparency') && containsCambodia(fullText)) {
-      showScamBanner('Unknown', { keyword: 'Cambodia', context: 'Visible transparency page' });
+      const evidence = findAnyLocationEvidence(fullText, CAMBODIA_KEYWORDS, 'visible transparency page');
+      showScamBanner('Unknown', evidence || { keyword: 'Cambodia', source: 'visible transparency page', context: fullText });
       return;
     }
 
@@ -615,6 +654,7 @@
 
     const cambodiaEvidence = findLocationEvidence(fullText, CAMBODIA_KEYWORDS);
     if (cambodiaEvidence) {
+      cambodiaEvidence.source = 'page transparency context';
       showScamBanner('Unknown', cambodiaEvidence);
       return;
     }

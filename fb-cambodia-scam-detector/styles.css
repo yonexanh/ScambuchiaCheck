@@ -47,7 +47,9 @@
 }
 
 .fb-scam-banner .fb-scam-page-name,
-.fb-scam-banner .fb-scam-page-url {
+.fb-scam-banner .fb-scam-page-url,
+.fb-scam-banner .fb-scam-reason,
+.fb-scam-banner .fb-scam-context {
   max-width: 80vw !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -62,6 +64,16 @@
 .fb-scam-banner .fb-scam-page-url {
   font-family: Menlo, Monaco, Consolas, monospace !important;
   font-size: 12px !important;
+}
+
+.fb-scam-banner .fb-scam-reason {
+  color: #fff4b8 !important;
+  font-weight: 700 !important;
+}
+
+.fb-scam-banner .fb-scam-context {
+  font-size: 11px !important;
+  opacity: 0.85 !important;
 }
 
 .fb-scam-banner .fb-scam-close {
