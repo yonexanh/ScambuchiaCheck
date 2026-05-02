@@ -477,6 +477,25 @@
     return null;
   }
 
+  function findVietnameseManagerLocationEvidence(text, source) {
+    const normalizedText = String(text || '')
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+    const hasManagerLocationLabel =
+      normalizedText.includes('vị trí quốc gia/khu vực chính của những người quản lý trang này là') ||
+      normalizedText.includes('vi tri quoc gia/khu vuc chinh cua nhung nguoi quan ly trang nay la');
+
+    if (!hasManagerLocationLabel || !containsCambodia(text)) return null;
+
+    return {
+      keyword: 'Cambodia',
+      source,
+      context: getTextWindow(text, 'Cambodia', 180) || text,
+    };
+  }
+
   function formatEvidenceDetails(details) {
     const keyword = escapeHtml(details && details.keyword ? details.keyword : 'Cambodia');
     const source = escapeHtml(details && details.source ? details.source : 'Page Transparency');
@@ -636,6 +655,24 @@
 
     const fullText = decodeFacebookText(allText.join(' '));
     const transparencyText = fetchedText.join(' ');
+
+    const fetchedManagerLocationEvidence = findVietnameseManagerLocationEvidence(
+      transparencyText,
+      'dòng vị trí quốc gia/khu vực của người quản lý Trang'
+    );
+    if (fetchedManagerLocationEvidence) {
+      showScamBanner('Unknown', fetchedManagerLocationEvidence);
+      return;
+    }
+
+    const visibleManagerLocationEvidence = findVietnameseManagerLocationEvidence(
+      fullText,
+      'dòng vị trí quốc gia/khu vực của người quản lý Trang'
+    );
+    if (url.includes('about_profile_transparency') && visibleManagerLocationEvidence) {
+      showScamBanner('Unknown', visibleManagerLocationEvidence);
+      return;
+    }
 
     if (transparencyText && containsCambodia(transparencyText)) {
       const evidence = findAnyLocationEvidence(transparencyText, CAMBODIA_KEYWORDS, 'fetched transparency page');
