@@ -46,6 +46,24 @@
   letter-spacing: 0.5px !important;
 }
 
+.fb-scam-banner .fb-scam-page-name,
+.fb-scam-banner .fb-scam-page-url {
+  max-width: 80vw !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.fb-scam-banner .fb-scam-page-name {
+  font-weight: 700 !important;
+  margin-top: 6px !important;
+}
+
+.fb-scam-banner .fb-scam-page-url {
+  font-family: Menlo, Monaco, Consolas, monospace !important;
+  font-size: 12px !important;
+}
+
 .fb-scam-banner .fb-scam-close {
   position: absolute !important;
   right: 16px !important;

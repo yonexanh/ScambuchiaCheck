@@ -432,6 +432,29 @@
     return { hasCambodia, hasVietnam, locations };
   }
 
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function getCurrentPageName() {
+    const heading = document.querySelector('h1');
+    if (heading && heading.textContent.trim()) {
+      return heading.textContent.trim();
+    }
+
+    const title = document.title.replace(/\s*\|\s*Facebook\s*$/i, '').trim();
+    return title || extractPageId(window.location.href) || 'Unknown Facebook page';
+  }
+
+  function getCurrentPageUrl() {
+    return window.location.href.split('#')[0];
+  }
+
   function showScamBanner(pageName, details) {
     if (bannerShown) return;
     bannerShown = true;
@@ -441,12 +464,16 @@
 
     const banner = document.createElement('div');
     banner.className = 'fb-scam-banner';
+    const displayPageName = escapeHtml(pageName && pageName !== 'Unknown' ? pageName : getCurrentPageName());
+    const displayPageUrl = escapeHtml(getCurrentPageUrl());
     banner.innerHTML = `
       <span class="fb-scam-icon">⚠️</span>
       <div class="fb-scam-text">
         <span class="fb-scam-main">⚠️ SCAM WARNING ⚠️</span>
         <span class="fb-scam-detail">This page is managed from Cambodia — High Risk of Scam</span>
         <span class="fb-scam-detail" style="font-size: 12px; margin-top: 4px;">Trang này được quản lý từ Campuchia — Nguy cơ lừa đảo cao</span>
+        <span class="fb-scam-detail fb-scam-page-name">Page: ${displayPageName}</span>
+        <span class="fb-scam-detail fb-scam-page-url">URL: ${displayPageUrl}</span>
       </div>
       <button class="fb-scam-close" type="button">✕</button>
     `;
@@ -456,7 +483,7 @@
 
     const bodyStyle = document.body.style;
     bodyPaddingBeforeWarning = bodyStyle.paddingTop || '';
-    bodyStyle.paddingTop = '90px';
+    bodyStyle.paddingTop = '135px';
 
     const pageContainer =
       document.querySelector('[role="main"]') ||

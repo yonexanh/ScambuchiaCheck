@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "FB Cambodia Scam Detector",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Detects Facebook pages managed from Cambodia and labels them as SCAM",
   "permissions": [],
   "host_permissions": [
